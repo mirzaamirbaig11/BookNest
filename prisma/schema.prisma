@@ -1,0 +1,330 @@
+// BookNest database schema
+// Run `npx prisma migrate dev --name init` after setting DATABASE_URL in .env
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────
+// USERS & AUTH
+// ─────────────────────────────────────────────────────────────
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id                     String   @id @default(cuid())
+  fullName               String
+  email                  String   @unique
+  mobile                 String   @unique
+  passwordHash           String
+  role                   Role     @default(USER)
+  profilePictureUrl      String?
+  resetPasswordToken     String?  @unique
+  resetPasswordExpiresAt DateTime?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  addresses       Address[]
+  favorites       Favorite[]
+  readingHistory  ReadingHistory[]
+  cart            Cart?
+  orders          Order[]
+  reviews         Review[]
+  contactMessages ContactMessage[]
+  auditLogs       AuditLog[]
+
+  @@index([email])
+  @@index([mobile])
+}
+
+model Address {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName   String
+  mobile     String
+  line1      String
+  city       String
+  state      String
+  pincode    String
+  country    String   @default("India")
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  orders     Order[]
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// CATALOG
+// ─────────────────────────────────────────────────────────────
+
+model Category {
+  id            String         @id @default(cuid())
+  name          String         @unique
+  slug          String         @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subcategories Subcategory[]
+  books         Book[]
+}
+
+model Subcategory {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  books      Book[]
+
+  @@unique([categoryId, slug])
+}
+
+enum BookType {
+  READING
+  PHYSICAL
+  BOTH
+}
+
+model Book {
+  id               String       @id @default(cuid())
+  title            String
+  slug             String       @unique
+  author           String
+  description      String
+  categoryId       String
+  category         Category     @relation(fields: [categoryId], references: [id])
+  subcategoryId    String?
+  subcategory      Subcategory? @relation(fields: [subcategoryId], references: [id])
+  publisher        String?
+  isbn             String?      @unique
+  language         String       @default("English")
+  pages            Int?
+  publicationYear  Int?
+
+  coverImageUrl    String?
+  pdfFileUrl       String?
+  pdfFileSizeBytes Int?
+
+  type             BookType     @default(READING)
+
+  originalPrice    Decimal      @db.Decimal(10, 2)
+  sellingPrice     Decimal      @db.Decimal(10, 2)
+  discountPercent  Int          @default(0)
+  stockQuantity    Int          @default(0)
+
+  featured         Boolean      @default(false)
+  published        Boolean      @default(false)
+  readingEnabled   Boolean      @default(false)
+  storeEnabled     Boolean      @default(false)
+  downloadEnabled  Boolean      @default(false)
+
+  ratingAverage    Decimal      @default(0) @db.Decimal(3, 2)
+  ratingCount      Int          @default(0)
+
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  favorites        Favorite[]
+  readingHistory   ReadingHistory[]
+  cartItems        CartItem[]
+  orderItems       OrderItem[]
+  reviews          Review[]
+
+  @@index([categoryId])
+  @@index([subcategoryId])
+  @@index([published, storeEnabled])
+  @@index([published, readingEnabled])
+  @@index([title])
+  @@index([author])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, bookId])
+  @@index([userId])
+}
+
+model ReadingHistory {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId        String
+  book          Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  lastPage      Int      @default(1)
+  totalPages    Int?
+  lastReadAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  @@unique([userId, bookId])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// CART
+// ─────────────────────────────────────────────────────────────
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, bookId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// ORDERS & PAYMENTS
+// ─────────────────────────────────────────────────────────────
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PAYMENT_PENDING
+  PAYMENT_VERIFIED
+  PAYMENT_REJECTED
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  addressId       String
+  address         Address       @relation(fields: [addressId], references: [id])
+
+  subtotal        Decimal       @db.Decimal(10, 2)
+  discountAmount  Decimal       @default(0) @db.Decimal(10, 2)
+  shippingAmount  Decimal       @default(0) @db.Decimal(10, 2)
+  totalAmount     Decimal       @db.Decimal(10, 2)
+
+  orderStatus     OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PAYMENT_PENDING)
+  isTestOrder     Boolean       @default(false)
+
+  items           OrderItem[]
+  payment         Payment?
+  reviews         Review[]
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([orderStatus])
+  @@index([paymentStatus])
+}
+
+model OrderItem {
+  id            String  @id @default(cuid())
+  orderId       String
+  order         Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  bookId        String
+  book          Book    @relation(fields: [bookId], references: [id])
+  titleSnapshot String
+  priceSnapshot Decimal @db.Decimal(10, 2)
+  quantity      Int
+
+  @@index([orderId])
+  @@index([bookId])
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  orderId           String        @unique
+  order             Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  method            String        @default("UPI")
+  upiId             String
+  amount            Decimal       @db.Decimal(10, 2)
+  upiPayeeReference  String       @unique
+  utrNumber         String?
+  utrSubmittedAt    DateTime?
+  status            PaymentStatus @default(PAYMENT_PENDING)
+  isTestPayment     Boolean       @default(false)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────
+// REVIEWS, CONTACT, AUDIT
+// ─────────────────────────────────────────────────────────────
+
+model Review {
+  id        String   @id @default(cuid())
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  rating    Int
+  comment   String
+  hidden    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, bookId, orderId])
+  @@index([bookId])
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  name      String
+  email     String
+  subject   String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  adminId       String
+  admin         User     @relation(fields: [adminId], references: [id])
+  action        String
+  entityType    String
+  entityId      String
+  previousValue String?
+  newValue      String?
+  createdAt     DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
