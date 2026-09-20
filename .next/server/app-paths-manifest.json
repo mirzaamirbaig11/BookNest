@@ -1,20 +1,8 @@
 {
-  "/api/categories/route": "app/api/categories/route.js",
+  "/page": "app/page.js",
+  "/read/[id]/page": "app/read/[id]/page.js",
   "/api/auth/me/route": "app/api/auth/me/route.js",
-  "/api/admin/messages/route": "app/api/admin/messages/route.js",
-  "/api/admin/books/route": "app/api/admin/books/route.js",
-  "/api/admin/reviews/route": "app/api/admin/reviews/route.js",
-  "/api/admin/users/route": "app/api/admin/users/route.js",
-  "/api/admin/books/[id]/route": "app/api/admin/books/[id]/route.js",
-  "/api/admin/orders/route": "app/api/admin/orders/route.js",
-  "/admin/page": "app/admin/page.js",
-  "/admin/books/new/page": "app/admin/books/new/page.js",
-  "/admin/books/page": "app/admin/books/page.js",
-  "/admin/reviews/page": "app/admin/reviews/page.js",
-  "/admin/users/page": "app/admin/users/page.js",
-  "/admin/messages/page": "app/admin/messages/page.js",
-  "/admin/orders/page": "app/admin/orders/page.js",
-  "/admin/settings/page": "app/admin/settings/page.js",
-  "/admin/categories/page": "app/admin/categories/page.js",
-  "/admin/books/[id]/page": "app/admin/books/[id]/page.js"
+  "/api/reading-progress/[bookId]/route": "app/api/reading-progress/[bookId]/route.js",
+  "/api/books/[id]/pdf/route": "app/api/books/[id]/pdf/route.js",
+  "/api/reading-progress/route": "app/api/reading-progress/route.js"
 }
