@@ -9,6 +9,8 @@ async function ownedItem(itemId: string, userId: string) {
   });
 }
 
+export const dynamic = 'force-dynamic';
+
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   const auth = await requireUser();
   if ('error' in auth) return auth.error;

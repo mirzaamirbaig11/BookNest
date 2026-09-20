@@ -4,6 +4,8 @@ import { contactSchema } from '@/lib/validation';
 import { getSession } from '@/lib/auth';
 import { jsonError, rateLimit } from '@/lib/api-helpers';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') ?? 'unknown';
   if (!rateLimit(`contact:${ip}`, 10, 60_000)) {

@@ -9,6 +9,8 @@ const updateSchema = z.object({
   mobile: z.string().trim().regex(/^(\+91)?[6-9]\d{9}$/).optional(),
 });
 
+export const dynamic = 'force-dynamic';
+
 export async function PATCH(request: NextRequest) {
   const auth = await requireUser();
   if ('error' in auth) return auth.error;

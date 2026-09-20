@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { requireUser, jsonError } from '@/lib/api-helpers';
 import { reviewSchema } from '@/lib/validation';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const bookId = request.nextUrl.searchParams.get('bookId');
   if (!bookId) return jsonError('bookId is required.');

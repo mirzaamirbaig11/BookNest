@@ -4,6 +4,8 @@ import { loginSchema } from '@/lib/validation';
 import { verifyPassword, createSessionToken, setSessionCookie } from '@/lib/auth';
 import { jsonError, rateLimit } from '@/lib/api-helpers';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') ?? 'unknown';
   if (!rateLimit(`login:${ip}`, 15, 60_000)) {

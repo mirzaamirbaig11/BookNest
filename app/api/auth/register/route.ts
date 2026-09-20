@@ -4,6 +4,8 @@ import { registerSchema } from '@/lib/validation';
 import { hashPassword, createSessionToken, setSessionCookie } from '@/lib/auth';
 import { jsonError, rateLimit } from '@/lib/api-helpers';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') ?? 'unknown';
   if (!rateLimit(`register:${ip}`, 10, 60_000)) {

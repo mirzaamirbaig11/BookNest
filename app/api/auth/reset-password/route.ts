@@ -4,6 +4,8 @@ import { resetPasswordSchema } from '@/lib/validation';
 import { hashPassword } from '@/lib/auth';
 import { jsonError } from '@/lib/api-helpers';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   const parsed = resetPasswordSchema.safeParse(body);

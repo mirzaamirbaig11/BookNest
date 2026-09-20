@@ -4,6 +4,8 @@ import { getSession } from '@/lib/auth';
 import { saveUploadedFile, FileValidationError } from '@/lib/storage';
 import { jsonError } from '@/lib/api-helpers';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   const session = await getSession();
   if (!session) return jsonError('Please log in to continue.', 401);

@@ -4,6 +4,8 @@ import { requireAdmin, jsonError } from '@/lib/api-helpers';
 
 const VALID_STATUSES = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
+export const dynamic = 'force-dynamic';
+
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;

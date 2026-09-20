@@ -4,6 +4,8 @@ import { requireAdmin } from '@/lib/api-helpers';
 import { jsonError } from '@/lib/api-helpers';
 import { slugify } from '@/lib/validation';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const categories = await prisma.category.findMany({
     include: { subcategories: true },

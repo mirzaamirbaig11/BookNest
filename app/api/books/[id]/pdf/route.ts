@@ -8,6 +8,8 @@ import { jsonError } from '@/lib/api-helpers';
 // content that renders in their browser. This endpoint's job is only to keep the file from
 // being reachable via a guessable public URL and to stop a plain "download" link when
 // Download Enabled is off — it is not a guarantee against copying.
+export const dynamic = 'force-dynamic';
+
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   const book = await prisma.book.findFirst({
     where: { OR: [{ id: params.id }, { slug: params.id }], published: true, readingEnabled: true },

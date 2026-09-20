@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { requireUser, jsonError } from '@/lib/api-helpers';
 import { addressSchema } from '@/lib/validation';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const auth = await requireUser();
   if ('error' in auth) return auth.error;

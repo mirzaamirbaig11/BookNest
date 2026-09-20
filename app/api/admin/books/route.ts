@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { requireAdmin, jsonError } from '@/lib/api-helpers';
 import { bookSchema, slugify } from '@/lib/validation';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;

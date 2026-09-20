@@ -5,6 +5,8 @@ import { generateOrderNumber } from '@/lib/order-number';
 import { buildPayeeReference } from '@/lib/upi';
 import { calculateShipping } from '@/lib/pricing';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const auth = await requireUser();
   if ('error' in auth) return auth.error;

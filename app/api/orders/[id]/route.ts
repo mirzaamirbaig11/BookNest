@@ -4,6 +4,8 @@ import { getSession } from '@/lib/auth';
 import { jsonError } from '@/lib/api-helpers';
 import { buildUpiUri, generateUpiQrDataUrl } from '@/lib/upi';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getSession();
   if (!session) return jsonError('Please log in to continue.', 401);

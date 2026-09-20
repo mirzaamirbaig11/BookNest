@@ -5,6 +5,8 @@ import { forgotPasswordSchema } from '@/lib/validation';
 import { sendPasswordResetEmail } from '@/lib/mail';
 import { jsonError, rateLimit } from '@/lib/api-helpers';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') ?? 'unknown';
   if (!rateLimit(`forgot:${ip}`, 5, 60_000)) {
